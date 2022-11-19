@@ -2,7 +2,7 @@ use core::convert::TryInto;
 use core::fmt;
 use core::ops::{Add, Mul, Neg, Sub};
 
-use ff::PrimeField;
+use ff::{PrimeField, PrimeFieldBits};
 use rand::RngCore;
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
 
