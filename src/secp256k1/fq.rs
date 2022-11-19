@@ -275,6 +275,53 @@ impl SqrtRatio for Fq {
     }
 }
 
+#[cfg(all(feature = "bits", not(target_pointer_width = "64")))]
+type ReprBits = [u32; 8];
+
+#[cfg(all(feature = "bits", target_pointer_width = "64"))]
+type ReprBits = [u64; 4];
+
+#[cfg(feature = "bits")]
+impl PrimeFieldBits for Fq {
+    type ReprBits = ReprBits;
+
+    fn to_le_bits(&self) -> FieldBits<Self::ReprBits> {
+        let bytes = self.to_repr();
+
+        #[cfg(not(target_pointer_width = "64"))]
+        let limbs = [
+            u32::from_le_bytes(bytes[0..4].try_into().unwrap()),
+            u32::from_le_bytes(bytes[4..8].try_into().unwrap()),
+            u32::from_le_bytes(bytes[8..12].try_into().unwrap()),
+            u32::from_le_bytes(bytes[12..16].try_into().unwrap()),
+            u32::from_le_bytes(bytes[16..20].try_into().unwrap()),
+            u32::from_le_bytes(bytes[20..24].try_into().unwrap()),
+            u32::from_le_bytes(bytes[24..28].try_into().unwrap()),
+            u32::from_le_bytes(bytes[28..32].try_into().unwrap()),
+        ];
+
+        #[cfg(target_pointer_width = "64")]
+        let limbs = [
+            u64::from_le_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_le_bytes(bytes[8..16].try_into().unwrap()),
+            u64::from_le_bytes(bytes[16..24].try_into().unwrap()),
+            u64::from_le_bytes(bytes[24..32].try_into().unwrap()),
+        ];
+
+        FieldBits::new(limbs)
+    }
+
+    fn char_le_bits() -> FieldBits<Self::ReprBits> {
+        #[cfg(not(target_pointer_width = "64"))]
+        {
+            FieldBits::new(MODULUS_LIMBS_32)
+        }
+
+        #[cfg(target_pointer_width = "64")]
+        FieldBits::new(MODULUS.0)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
