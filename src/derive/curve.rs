@@ -322,7 +322,15 @@ macro_rules! new_curve_impl {
 
 
             fn hash_to_curve<'a>(_: &'a str) -> Box<dyn Fn(&[u8]) -> Self + 'a> {
-                unimplemented!();
+
+                Box::new(move |_| {
+                    let generator = $name_affine::generator();
+                    Self {
+                        x: generator.x,
+                        y: generator.y,
+                        z: $base::one(),
+                    }
+                })
             }
 
             fn is_on_curve(&self) -> Choice {
